@@ -73,7 +73,7 @@ This multi-stage process allows the model to accurately describe not only what o
 ## Performance
 - Speed: **YOLOv5** ensures real-time object detection, making the entire pipeline efficient for applications requiring fast processing.
 - Accuracy: **ViT** provides state-of-the-art feature extraction, capturing complex visual patterns, while **GPT-2** generates human-like captions with impressive fluency and relevance.
-- The model has been evaluated on **COCO** and **Flickr30k** Datasets, achieving a 0.21 score on **ROUGE** and 9.31 on **BLEU** for captioning.
+- The model has been trained and evaluated on **COCO** and **Flickr30k** Datasets, achieving a 0.21 score on **ROUGE** and 9.31 on **BLEU** for captioning.
 
 ## License
 This project is licensed under the **Apache 2.0** License - see the LICENSE file for details.
