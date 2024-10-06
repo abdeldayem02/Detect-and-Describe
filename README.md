@@ -64,15 +64,15 @@ Before using the Detect-and-Describe model, ensure you have the following instal
    cd Detect-and-Describe
 
 ## Model Architecture
-**YOLOv5**: Detects objects in the input image, returning bounding boxes and class labels.
-**Vision Transformer (ViT)**: Extracts high-level features from the detected objects or the full image.
-**GPT-2**: Uses the image features as input to generate a descriptive caption.
+- **YOLOv5**: Detects objects in the input image, returning bounding boxes and class labels.
+- **Vision Transformer (ViT)**: Extracts high-level features from the detected objects or the full image.
+- **GPT-2**: Uses the image features as input to generate a descriptive caption.
 This multi-stage process allows the model to accurately describe not only what objects are present but also how they interact within the scene.
 
 ## Performance
-Speed: **YOLOv5** ensures real-time object detection, making the entire pipeline efficient for applications requiring fast processing.
-Accuracy: **ViT** provides state-of-the-art feature extraction, capturing complex visual patterns, while **GPT-2** generates human-like captions with impressive fluency and relevance.
-The model has been evaluated on **COCO** and **Flickr30k** Datasets, achieving a 0.21 score on **ROUGE** and 9.31 on **BLEU** for captioning.
+- Speed: **YOLOv5** ensures real-time object detection, making the entire pipeline efficient for applications requiring fast processing.
+- Accuracy: **ViT** provides state-of-the-art feature extraction, capturing complex visual patterns, while **GPT-2** generates human-like captions with impressive fluency and relevance.
+- The model has been evaluated on **COCO** and **Flickr30k** Datasets, achieving a 0.21 score on **ROUGE** and 9.31 on **BLEU** for captioning.
 
 ## License
 This project is licensed under the **Apache 2.0** License - see the LICENSE file for details.
