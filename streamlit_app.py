@@ -1,12 +1,11 @@
 import streamlit as st
 from PIL import Image
-import os
 import torch
-from transformers import AutoImageProcessor, AutoTokenizer, VisionEncoderDecoderModel
+from transformers import AutoImageProcessor, AutoTokenizer, VisionEncoderDecoderModel, DetrForObjectDetection
 
 # Load models and weights
-weights_path = 'weights/best14.pt'
-object_detection_model = torch.hub.load('Mexbow/yolov5_model', 'custom', path=weights_path, autoshape=True)
+object_detection_processor = AutoImageProcessor.from_pretrained("facebook/detr-resnet-50")
+object_detection_model = DetrForObjectDetection.from_pretrained("facebook/detr-resnet-50")
 captioning_processor = AutoImageProcessor.from_pretrained("motheecreator/ViT-GPT2-Image-Captioning")
 tokenizer = AutoTokenizer.from_pretrained("motheecreator/ViT-GPT2-Image-Captioning")
 caption_model = VisionEncoderDecoderModel.from_pretrained("motheecreator/ViT-GPT2-Image-Captioning")
@@ -19,18 +18,15 @@ st.write("Upload an image to detect objects and generate captions.")
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
 def process_image(image):
-    # Detect objects in the image
-    results = object_detection_model(image)
+    # Detect objects in the image using DETR
+    inputs = object_detection_processor(images=image, return_tensors="pt")
+    outputs = object_detection_model(**inputs)
     
-    # Render image with detected boxes
-    img_with_boxes = results.render()[0]
-    detected_image_path = 'static/detected_image.jpg'
-    img_with_boxes = Image.fromarray(img_with_boxes)
-    img_with_boxes.save(detected_image_path)
+    # Extract bounding boxes and labels
+    boxes = outputs.logits.softmax(-1)[0, :, :-1].argmax(-1)
+    boxes = outputs.pred_boxes[0].cpu().detach().numpy()
     
-    # Get boxes and labels
-    boxes = results.xyxy[0][:, :4].cpu().numpy()
-    labels = [results.names[int(x)] for x in results.xyxy[0][:, 5].cpu().numpy()]
+    labels = [object_detection_model.config.id2label[label.item()] for label in boxes]
 
     # Caption the original image
     original_inputs = captioning_processor(images=image, return_tensors="pt")
@@ -48,11 +44,19 @@ def process_image(image):
         caption = tokenizer.decode(caption_ids[0], skip_special_tokens=True)
         captions.append(caption)
     
-    return {'labels': labels, 'captions': captions, 'detected_image_path': detected_image_path}, original_caption
+    return {'labels': labels, 'captions': captions}, original_caption
 
 def crop_objects(image, boxes):
     cropped_images = []
     for box in boxes:
+        # Scale bounding box coordinates to image dimensions
+        width, height = image.size
+        box = [
+            int(box[0] * width),
+            int(box[1] * height),
+            int(box[2] * width),
+            int(box[3] * height),
+        ]
         cropped_image = image.crop((box[0], box[1], box[2], box[3]))
         cropped_images.append(cropped_image)
     return cropped_images
@@ -62,9 +66,8 @@ if uploaded_file is not None:
     image = Image.open(uploaded_file).convert('RGB')
     results, original_caption = process_image(image)
     
-    # Display original image and detected image
+    # Display original image and detected objects
     st.image(image, caption="Uploaded Image", use_column_width=True)
-    st.image(results['detected_image_path'], caption="Detected Objects", use_column_width=True)
     
     # Show captions
     st.write("**Original Image Caption:**", original_caption)
