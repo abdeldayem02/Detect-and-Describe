@@ -8,3 +8,4 @@ opencv-python
 flask
 dill
 requests
+timm
