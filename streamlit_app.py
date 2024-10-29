@@ -17,21 +17,37 @@ st.write("Upload an image to detect objects and generate captions.")
 # Image upload section
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
+from PIL import ImageDraw
+
 def process_image(image):
     # Detect objects in the image using YOLOS
     inputs = object_detection_processor(images=image, return_tensors="pt")
     outputs = object_detection_model(**inputs)
-    
-    # Extract bounding boxes and label indices
+
+    # Extract bounding boxes and labels
     boxes = outputs.pred_boxes[0].cpu().detach().numpy()
     labels_indices = outputs.logits[0].softmax(-1).argmax(-1).cpu().numpy()
     
-    # Filter label indices to include only those present in id2label
+    # Filter labels and map them to id2label
     labels = [
-        object_detection_model.config.id2label[label_idx] 
-        for label_idx in labels_indices 
+        object_detection_model.config.id2label[label_idx]
+        for label_idx in labels_indices
         if label_idx in object_detection_model.config.id2label
     ]
+
+    # Draw bounding boxes on the image
+    width, height = image.size
+    draw = ImageDraw.Draw(image)
+    for box, label in zip(boxes, labels):
+        # Convert normalized coordinates to absolute pixel values
+        left = int(box[0] * width)
+        upper = int(box[1] * height)
+        right = int(box[2] * width)
+        lower = int(box[3] * height)
+
+        # Draw the bounding box
+        draw.rectangle([(left, upper), (right, lower)], outline="red", width=3)
+        draw.text((left, upper), label, fill="red")
 
     # Caption the original image
     original_inputs = captioning_processor(images=image, return_tensors="pt")
