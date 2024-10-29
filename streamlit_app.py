@@ -12,7 +12,7 @@ def load_models():
 
     # Load captioning model and processor
     caption_model = VisionEncoderDecoderModel.from_pretrained("nlpconnect/vit-gpt2-image-captioning")
-    captioning_processor = AutoProcessor.from_pretrained("nlpconnect/vit-gpt2-image-captioning")
+    captioning_processor = VisionEncoderDecoderModel.from_pretrained("nlpconnect/vit-gpt2-image-captioning")
     tokenizer = AutoTokenizer.from_pretrained("nlpconnect/vit-gpt2-image-captioning")
 
     return object_detection_model, object_detection_processor, caption_model, captioning_processor, tokenizer
