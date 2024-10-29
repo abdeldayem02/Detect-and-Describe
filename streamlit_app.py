@@ -8,7 +8,7 @@ from PIL import ImageDraw
 def load_models():
     # Load object detection model and processor
     object_detection_model = YolosForObjectDetection.from_pretrained("hustvl/yolos-tiny")
-    object_detection_processor = YolosImageProcessor.from_pretrained("hustvl/yolos-tiny")
+    object_detection_processor = AutoImageProcessor.from_pretrained("hustvl/yolos-tiny")
 
     # Load captioning model and processor
     caption_model = VisionEncoderDecoderModel.from_pretrained("nlpconnect/vit-gpt2-image-captioning")
