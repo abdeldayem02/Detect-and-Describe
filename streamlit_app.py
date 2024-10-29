@@ -54,19 +54,25 @@ def process_image(image):
 
 
 def crop_objects(image, boxes):
+    width, height = image.size
     cropped_images = []
     for box in boxes:
-        # Scale bounding box coordinates to image dimensions
-        width, height = image.size
-        box = [
-            int(box[0] * width),
-            int(box[1] * height),
-            int(box[2] * width),
-            int(box[3] * height),
-        ]
-        cropped_image = image.crop((box[0], box[1], box[2], box[3]))
-        cropped_images.append(cropped_image)
+        # Convert normalized coordinates to absolute pixel values
+        left = int(box[0] * width)
+        upper = int(box[1] * height)
+        right = int(box[2] * width)
+        lower = int(box[3] * height)
+        
+        # Ensure coordinates are in the correct order
+        if right > left and lower > upper:
+            cropped_image = image.crop((left, upper, right, lower))
+            cropped_images.append(cropped_image)
+        else:
+            # Skip invalid boxes
+            print(f"Invalid box coordinates: {(left, upper, right, lower)}")
+
     return cropped_images
+
 
 # Display results if an image is uploaded
 if uploaded_file is not None:
