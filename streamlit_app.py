@@ -23,10 +23,9 @@ def process_image(image):
     outputs = object_detection_model(**inputs)
     
     # Extract bounding boxes and labels
-    boxes = outputs.logits.softmax(-1)[0, :, :-1].argmax(-1)
     boxes = outputs.pred_boxes[0].cpu().detach().numpy()
-    
-    labels = [object_detection_model.config.id2label[label.item()] for label in boxes]
+    labels_indices = outputs.logits[0].softmax(-1).argmax(-1).cpu().numpy()
+    labels = [object_detection_model.config.id2label[label_idx] for label_idx in labels_indices]
 
     # Caption the original image
     original_inputs = captioning_processor(images=image, return_tensors="pt")
@@ -45,6 +44,7 @@ def process_image(image):
         captions.append(caption)
     
     return {'labels': labels, 'captions': captions}, original_caption
+
 
 def crop_objects(image, boxes):
     cropped_images = []
