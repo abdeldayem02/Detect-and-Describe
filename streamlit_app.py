@@ -4,12 +4,21 @@ import torch
 from transformers import AutoImageProcessor, AutoTokenizer, VisionEncoderDecoderModel, YolosForObjectDetection
 from PIL import ImageDraw
 
-# Load models and weights
-object_detection_processor = AutoImageProcessor.from_pretrained("hustvl/yolos-tiny")
-object_detection_model = YolosForObjectDetection.from_pretrained("hustvl/yolos-tiny")
-captioning_processor = AutoImageProcessor.from_pretrained("motheecreator/ViT-GPT2-Image-Captioning")
-tokenizer = AutoTokenizer.from_pretrained("motheecreator/ViT-GPT2-Image-Captioning")
-caption_model = VisionEncoderDecoderModel.from_pretrained("motheecreator/ViT-GPT2-Image-Captioning")
+@st.cache_resource
+def load_models():
+    # Load object detection model and processor
+    object_detection_model = YolosForObjectDetection.from_pretrained("hustvl/yolos-tiny")
+    object_detection_processor = YolosImageProcessor.from_pretrained("hustvl/yolos-tiny")
+
+    # Load captioning model and processor
+    caption_model = VisionEncoderDecoderModel.from_pretrained("nlpconnect/vit-gpt2-image-captioning")
+    captioning_processor = AutoProcessor.from_pretrained("nlpconnect/vit-gpt2-image-captioning")
+    tokenizer = AutoTokenizer.from_pretrained("nlpconnect/vit-gpt2-image-captioning")
+
+    return object_detection_model, object_detection_processor, caption_model, captioning_processor, tokenizer
+
+# Load models once and reuse them
+object_detection_model, object_detection_processor, caption_model, captioning_processor, tokenizer = load_models()
 
 # Streamlit app setup
 st.title("Object Detection and Image Captioning")
