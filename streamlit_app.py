@@ -2,6 +2,7 @@ import streamlit as st
 from PIL import Image
 import torch
 from transformers import AutoImageProcessor, AutoTokenizer, VisionEncoderDecoderModel, YolosForObjectDetection
+from PIL import ImageDraw
 
 # Load models and weights
 object_detection_processor = AutoImageProcessor.from_pretrained("hustvl/yolos-tiny")
@@ -16,8 +17,6 @@ st.write("Upload an image to detect objects and generate captions.")
 
 # Image upload section
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
-
-from PIL import ImageDraw
 
 def process_image(image):
     # Detect objects in the image using YOLOS
@@ -44,10 +43,12 @@ def process_image(image):
         upper = int(box[1] * height)
         right = int(box[2] * width)
         lower = int(box[3] * height)
-
-        # Draw the bounding box
-        draw.rectangle([(left, upper), (right, lower)], outline="red", width=3)
-        draw.text((left, upper), label, fill="red")
+        
+        # Ensure the coordinates are valid
+        if left < right and upper < lower:
+            # Draw the bounding box
+            draw.rectangle([(left, upper), (right, lower)], outline="red", width=3)
+            draw.text((left, upper), label, fill="red")
 
     # Caption the original image
     original_inputs = captioning_processor(images=image, return_tensors="pt")
@@ -66,6 +67,7 @@ def process_image(image):
         captions.append(caption)
     
     return {'labels': labels, 'captions': captions}, original_caption
+
 
 
 
