@@ -1,11 +1,11 @@
 import streamlit as st
 from PIL import Image
 import torch
-from transformers import AutoImageProcessor, AutoTokenizer, VisionEncoderDecoderModel, DetrForObjectDetection
+from transformers import AutoImageProcessor, AutoTokenizer, VisionEncoderDecoderModel, YolosForObjectDetection
 
 # Load models and weights
-object_detection_processor = AutoImageProcessor.from_pretrained("facebook/detr-resnet-50")
-object_detection_model = DetrForObjectDetection.from_pretrained("facebook/detr-resnet-50")
+object_detection_processor = AutoImageProcessor.from_pretrained("hustvl/yolos-tiny")
+object_detection_model = YolosForObjectDetection.from_pretrained("hustvl/yolos-tiny")
 captioning_processor = AutoImageProcessor.from_pretrained("motheecreator/ViT-GPT2-Image-Captioning")
 tokenizer = AutoTokenizer.from_pretrained("motheecreator/ViT-GPT2-Image-Captioning")
 caption_model = VisionEncoderDecoderModel.from_pretrained("motheecreator/ViT-GPT2-Image-Captioning")
@@ -18,7 +18,7 @@ st.write("Upload an image to detect objects and generate captions.")
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
 def process_image(image):
-    # Detect objects in the image using DETR
+    # Detect objects in the image using YOLOS
     inputs = object_detection_processor(images=image, return_tensors="pt")
     outputs = object_detection_model(**inputs)
     
