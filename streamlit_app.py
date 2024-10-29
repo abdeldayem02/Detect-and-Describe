@@ -22,10 +22,16 @@ def process_image(image):
     inputs = object_detection_processor(images=image, return_tensors="pt")
     outputs = object_detection_model(**inputs)
     
-    # Extract bounding boxes and labels
+    # Extract bounding boxes and label indices
     boxes = outputs.pred_boxes[0].cpu().detach().numpy()
     labels_indices = outputs.logits[0].softmax(-1).argmax(-1).cpu().numpy()
-    labels = [object_detection_model.config.id2label[label_idx] for label_idx in labels_indices]
+    
+    # Filter label indices to include only those present in id2label
+    labels = [
+        object_detection_model.config.id2label[label_idx] 
+        for label_idx in labels_indices 
+        if label_idx in object_detection_model.config.id2label
+    ]
 
     # Caption the original image
     original_inputs = captioning_processor(images=image, return_tensors="pt")
@@ -44,6 +50,7 @@ def process_image(image):
         captions.append(caption)
     
     return {'labels': labels, 'captions': captions}, original_caption
+
 
 
 def crop_objects(image, boxes):
